@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<PublishAot>true</PublishAot>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="ImGui.NET" Version="1.89.9.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <FrameworkAssemblies Remove="cimgui.dll" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="cimgui.dll" />
+	  <None Remove="PInvokeHooker.dll" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PrivateSdkAssemblies Remove="cimgui.dll" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="cimgui.dll">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="PInvokeHooker.dll">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	</ItemGroup>
+
+</Project>
