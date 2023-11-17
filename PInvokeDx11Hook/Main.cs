@@ -74,28 +74,22 @@ namespace PInvokeDx11Hook
 
         public static void HkPresent(IntPtr swapChainPtr, int syncInterval, int flags)
         {
-            Console.WriteLine("HkPresent called");
             if (!isInit)
             {
-                Console.WriteLine("init start");
                 var hwnd = GetHWND();
                 var device = GetDevice();
                 var context = GetContext();
 
-                Console.WriteLine("device " + device);
-                Console.WriteLine("hwnd " + hwnd);
                 ImGui.CreateContext();
                 ImplWin32.Init(hwnd);
                 ImplDX11.Init(device, context);
                 isInit = true;
-                Console.WriteLine("init finished");
             }
 
-            Console.WriteLine("post init render");
             ImplDX11.NewFrame();
             ImplWin32.NewFrame();
             ImGui.NewFrame();
-            ImGui.Begin("vynxc is cool");
+            ImGui.Begin(text);
             ImGui.End();
             ImGui.Render();
 
@@ -103,17 +97,13 @@ namespace PInvokeDx11Hook
 
         public static void Render()
         {
-            Console.WriteLine("Render called");
             ImplDX11.RenderDrawData(ImGui.GetDrawData());
         }
 
         public static long WndProcHandler(IntPtr hWnd, uint Msg, long wParam, uint lParam)
         {
-            Console.WriteLine("WndProcHandler called");
-            Console.WriteLine("Hwnd: " + hWnd + " Msg: " + Msg + " wParam " + wParam + " lParam " + lParam);
             //TODO: sus
             var data = ImplWin32.WndProcHandler(hWnd, Msg, wParam, lParam);
-            Console.WriteLine("WndProcHandler: " + data);
             return data;
         }
 
@@ -146,12 +136,17 @@ namespace PInvokeDx11Hook
 
             return true;
         }
-
+        static string text = "IM COOL";
         private static void WorkerThread()
         {
             CreateHook();
-            Console.WriteLine("Running");
-            Console.ReadLine();
+            while (true)
+            {
+                Console.WriteLine("Enter Text");
+
+                text = Console.ReadLine() ?? "No text";
+            }
+
         }
     }
 }

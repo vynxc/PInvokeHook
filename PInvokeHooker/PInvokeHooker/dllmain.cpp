@@ -43,7 +43,6 @@ extern "C" {
 
 	bool init = false;
 	HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags) {
-		std::cout << "CPP: hkPresent";
 		if (!init)
 		{
 			if (SUCCEEDED(pSwapChain->GetDevice(__uuidof(ID3D11Device), (void**)&pDevice)))
@@ -59,7 +58,6 @@ extern "C" {
 				oWndProc = (WNDPROC)SetWindowLongPtr(window, GWLP_WNDPROC, (LONG_PTR)WndProc);
 				//InitImGui();
 				init = true;
-				std::cout << "CPP: Init Complete";
 			}
 			else
 				return oPresent(pSwapChain, SyncInterval, Flags);
@@ -74,20 +72,84 @@ extern "C" {
 		return oPresent(pSwapChain, SyncInterval, Flags);
 	}
 
+	uint64_t find_pattern(const char* module, const char* pattern)
+	{
+		uint64_t moduleAdress = (uint64_t)GetModuleHandleA(module);
+		if (!moduleAdress)
+			return 0;
 
+		static auto patternToByte = [](const char* pattern)
+			{
+				auto       bytes = std::vector<int>{};
+				const auto start = const_cast<char*>(pattern);
+				const auto end = const_cast<char*>(pattern) + strlen(pattern);
+
+				for (auto current = start; current < end; ++current)
+				{
+					if (*current == '?')
+					{
+						++current;
+						if (*current == '?')
+							++current;
+						bytes.push_back(-1);
+					}
+					else { bytes.push_back(strtoul(current, &current, 16)); }
+				}
+				return bytes;
+			};
+
+		const auto dosHeader = (PIMAGE_DOS_HEADER)moduleAdress;
+		const auto ntHeaders = (PIMAGE_NT_HEADERS)((std::uint8_t*)moduleAdress + dosHeader->e_lfanew);
+
+		const auto sizeOfImage = ntHeaders->OptionalHeader.SizeOfImage;
+		auto       patternBytes = patternToByte(pattern);
+		const auto scanBytes = reinterpret_cast<std::uint8_t*>(moduleAdress);
+
+		const auto s = patternBytes.size();
+		const auto d = patternBytes.data();
+
+		for (auto i = 0ul; i < sizeOfImage - s; ++i)
+		{
+			bool found = true;
+			for (auto j = 0ul; j < s; ++j)
+			{
+				if (scanBytes[i + j] != d[j] && d[j] != -1)
+				{
+					found = false;
+					break;
+				}
+			}
+			if (found) { return reinterpret_cast<uintptr_t>(&scanBytes[i]); }
+		}
+		return NULL;
+	}
 
 	bool init_kiero() {
 		if (kiero::init(kiero::RenderType::D3D11) == kiero::Status::Success) {
 			kiero::bind(8, (void**)&oPresent, hkPresent);
-			std::cout << "CPP: Init_kiero Complete";
 			return true;
 		}
-		std::cout << "CPP: Init_kiero failed";
 		return false;
 	}
-
+	bool steam = true;
 	__declspec(dllexport) void Init() {
-		init_kiero();
+		if (steam) {
+			auto present_hk_sig = find_pattern("GameOverlayRenderer64.dll", "48 89 6C 24 ? 48 89 74 24 ? 41 56 48 83 EC ? 41 8B E8");
+			auto create_hk_sig = find_pattern("GameOverlayRenderer64.dll", "48 89 5C 24 ? 57 48 83 EC ? 33 C0");
+
+			__int64(__fastcall * CreateHook)(
+				unsigned __int64 pFuncAddress,
+				__int64 pDetourFuncAddress,
+				unsigned __int64* pOriginalFuncAddressOut,
+				int a4);
+
+			CreateHook = (decltype(CreateHook))create_hk_sig;
+			CreateHook(present_hk_sig, (__int64)&hkPresent, (unsigned __int64*)&oPresent, 1);
+		}
+		else {
+			init_kiero();
+		}
+
 	}
 
 	__declspec(dllexport) HWND GetHWND() {

@@ -4,6 +4,7 @@
 #include <d3d11.h>
 #include <dxgi.h>
 #include "kiero/kiero.h"
+#include <vector>
 
 using Present = HRESULT(__stdcall*)(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
 using WNDPROC = LRESULT(CALLBACK*)(HWND, UINT, WPARAM, LPARAM);
