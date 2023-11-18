@@ -131,7 +131,8 @@ extern "C" {
 		}
 		return false;
 	}
-	bool steam = true;
+	bool steam = false;
+	bool discord = false;
 	__declspec(dllexport) void Init() {
 		if (steam) {
 			auto present_hk_sig = find_pattern("GameOverlayRenderer64.dll", "48 89 6C 24 ? 48 89 74 24 ? 41 56 48 83 EC ? 41 8B E8");
@@ -145,6 +146,12 @@ extern "C" {
 
 			CreateHook = (decltype(CreateHook))create_hk_sig;
 			CreateHook(present_hk_sig, (__int64)&hkPresent, (unsigned __int64*)&oPresent, 1);
+		}
+		else if (discord) {
+			uint64_t addr = (uint64_t)(GetModuleHandleA("DiscordHook64.dll")) + 0xE9090;
+			Present* discord_present = (Present*)addr;
+			oPresent = *discord_present;
+			_InterlockedExchangePointer((volatile PVOID*)addr, hkPresent);
 		}
 		else {
 			init_kiero();

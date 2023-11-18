@@ -5,6 +5,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<PublishAot>true</PublishAot>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -12,25 +13,25 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <FrameworkAssemblies Remove="cimgui.dll" />
+		<FrameworkAssemblies Remove="cimgui.dll" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Remove="cimgui.dll" />
-	  <None Remove="PInvokeHooker.dll" />
+		<None Remove="cimgui.dll" />
+		<None Remove="PInvokeHooker.dll" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PrivateSdkAssemblies Remove="cimgui.dll" />
+		<PrivateSdkAssemblies Remove="cimgui.dll" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Include="cimgui.dll">
-	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	  </EmbeddedResource>
-	  <EmbeddedResource Include="PInvokeHooker.dll">
-	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-	  </EmbeddedResource>
+		<EmbeddedResource Include="cimgui.dll">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</EmbeddedResource>
+		<EmbeddedResource Include="PInvokeHooker.dll">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</EmbeddedResource>
 	</ItemGroup>
 
 </Project>
